@@ -4,11 +4,11 @@ on:
   release:
     types: [published]
   push:
-    branches: [main]
+    branches: [release]
     # Publish semver tags as releases.
     tags: ['v*.*.*']
   pull_request:
-    branches: [main]
+    branches: [release]
 
 env:
   REGISTRY: ghcr.io
