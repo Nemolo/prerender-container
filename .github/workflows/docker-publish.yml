@@ -3,6 +3,7 @@ name: Create and publish a Docker image
 on:
   push:
     branches: ['release']
+    tags: ['v*.*.*']  # Solo tag semver
   release:
     types: [published]
 
@@ -14,7 +15,7 @@ jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write  # Necessario per creare release
       packages: write
       attestations: write
       id-token: write
@@ -57,3 +58,50 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## 🐳 Docker Images
+            
+            This release includes the following Docker images:
+            
+            ```bash
+            # Pull the image
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+            
+            # Available tags:
+            ${{ steps.meta.outputs.tags }}
+            ```
+            
+            ## 🚀 Usage
+            
+            ```bash
+            # Run the prerender server
+            docker run -p 3000:3000 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+            
+            # With domain whitelist
+            docker run -p 3000:3000 \
+              -e ALLOWED_DOMAINS="example.com,www.example.com" \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+            ```
+            
+            ## 📋 Image Details
+            
+            - **Registry**: `${{ env.REGISTRY }}`
+            - **Repository**: `${{ env.IMAGE_NAME }}`
+            - **Digest**: `${{ steps.push.outputs.digest }}`
+            - **Platform**: `linux/amd64`
+            
+            ## 🔗 Links
+            
+            - [View on GitHub Container Registry](https://github.com/${{ github.repository }}/pkgs/container/prerender-container)
+            - [Documentation](https://github.com/${{ github.repository }}#readme)
+          draft: false
+          prerelease: false
