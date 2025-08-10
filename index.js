@@ -41,7 +41,7 @@ server.onRequest = server.onRequest.bind(server)
 server.start();
 // Gestisci tutte le altre rotte con prerender
 app.use('/', server.onRequest)
-
+app.disable('x-powered-by');
 // Avvia SOLO il server Express
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
