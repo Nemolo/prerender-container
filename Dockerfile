@@ -37,7 +37,7 @@ EXPOSE 3000
 
 # Add healthcheck
 HEALTHCHECK --interval=120s --timeout=15s --start-period=40s --retries=2 \
-  CMD curl -f http://localhost:3000/render?url=https://example.com || exit 1
+  CMD curl -f http://localhost:3000/health || exit 1
 
 # Start the application
 CMD ["node", "index.js"]

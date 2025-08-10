@@ -13,6 +13,9 @@ if (process.env.ALLOWED_DOMAINS) {
   server.use(prerender.whitelist())
 }
 
-server.use(require('prerender-memory-cache'))
-server.use(prerender.httpHeaders())
-server.start()
+server.use(require('prerender-memory-cache'));
+server.use(prerender.httpHeaders());
+server.get('health', (req, res) => {
+  res.send('OK');
+});
+server.start();
